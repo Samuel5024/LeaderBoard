@@ -19,7 +19,8 @@ public class LoginRegister : MonoBehaviour
     public static LoginRegister instance;
     void Awake()
     {
-        instance = this;    
+        instance = this;
+        displayText.gameObject.SetActive(false);
     }
     public void OnRegister()
     {
@@ -72,6 +73,7 @@ public class LoginRegister : MonoBehaviour
 
     void SetDisplayText(string text, Color color)
     {
+        displayText.gameObject.SetActive(true);
         displayText.text = text;
         displayText.color = color;
     }
