@@ -13,6 +13,8 @@ public class PlayerController : MonoBehaviour
 
     private bool isPlaying;
 
+    public GameObject playButton;
+    public TextMeshProUGUI curTimeText;
     private void Awake()
     {
         rig = GetComponent<Rigidbody>();
@@ -25,10 +27,15 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if(!isPlaying)
+        {
+            return;
+        }
         float x = Input.GetAxis("Horizontal") * speed;
         float z = Input.GetAxis("Vertical") * speed;
 
         rig.linearVelocity = new Vector3(x, rig.angularVelocity.y, z);
+        curTimeText.text = (Time.time - startTime).ToString("F2");
     }
 
     // called when we collide with an object
@@ -50,6 +57,7 @@ public class PlayerController : MonoBehaviour
     // Begin starts the timer
     public void Begin ()
     {
+        playButton.SetActive(false);
         startTime = Time.time;
         isPlaying = true;
     }
@@ -57,7 +65,9 @@ public class PlayerController : MonoBehaviour
     // End gets called when timer has ended
     void End ()
     {
+        playButton.SetActive(true);
         timeTaken = Time.time - startTime;
         isPlaying = false;
+        Leaderboard.instance.SetLeaderboardEntry(-Mathf.RoundToInt(timeTaken * 1000.0f));
     }
 }
