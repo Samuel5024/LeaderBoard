@@ -19,12 +19,7 @@ public class PlayerController : MonoBehaviour
     {
         rig = GetComponent<Rigidbody>();
     }
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
+    
     void Update()
     {
         if(!isPlaying)
@@ -57,17 +52,17 @@ public class PlayerController : MonoBehaviour
     // Begin starts the timer
     public void Begin ()
     {
-        playButton.SetActive(false);
         startTime = Time.time;
         isPlaying = true;
+        playButton.SetActive(false);
     }
 
     // End gets called when timer has ended
     void End ()
     {
-        playButton.SetActive(true);
         timeTaken = Time.time - startTime;
         isPlaying = false;
+        playButton.SetActive(true);
         Leaderboard.instance.SetLeaderboardEntry(-Mathf.RoundToInt(timeTaken * 1000.0f));
     }
 }

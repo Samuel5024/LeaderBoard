@@ -17,10 +17,13 @@ public class LoginRegister : MonoBehaviour
     public string playFabId;
 
     public static LoginRegister instance;
-    void Awake()
+    private void Awake()
     {
-        instance = this;
         displayText.gameObject.SetActive(false);
+        if (instance == null)
+        {
+            instance = this;
+        }
     }
     public void OnRegister()
     {
@@ -56,7 +59,7 @@ public class LoginRegister : MonoBehaviour
         PlayFabClientAPI.LoginWithPlayFab(loginRequest,
             result =>
             {
-                SetDisplayText("Logged in as: " + result.PlayFabId, Color.green);
+                Debug.Log("Logged in as: " + result.PlayFabId);
                 
                 if(onLoggedIn != null)
                 {
@@ -67,7 +70,7 @@ public class LoginRegister : MonoBehaviour
             },
 
 
-            error => SetDisplayText(error.ErrorMessage, Color.red)
+            error => Debug.Log(error.ErrorMessage)
             );
     }
 
@@ -76,12 +79,5 @@ public class LoginRegister : MonoBehaviour
         displayText.gameObject.SetActive(true);
         displayText.text = text;
         displayText.color = color;
-    }
-    
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

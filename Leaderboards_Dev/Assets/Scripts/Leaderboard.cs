@@ -3,7 +3,6 @@ using UnityEngine;
 using PlayFab;
 using PlayFab.ClientModels;
 using TMPro;
-using UnityEditor.PackageManager;
 
 public class Leaderboard : MonoBehaviour
 {
@@ -14,13 +13,16 @@ public class Leaderboard : MonoBehaviour
     public static Leaderboard instance;
     private void Awake()
     {
-        instance = this;
+        if (instance == null)
+        {
+            instance = this;
+        }
     }
 
     // OnLoggedIn gets caled when we log into our PlayFab account
     public void OnLoggedIn ()
     {
-        leaderboardCanvas.SetActive(false);
+        leaderboardCanvas.SetActive(true);
         DisplayLeaderboard();
     }
 
@@ -49,7 +51,6 @@ public class Leaderboard : MonoBehaviour
             {
                 continue;
             }
-
             leaderboardEntries[x].transform.Find("PlayerName").GetComponent<TextMeshProUGUI>().text = (leaderboard[x].Position + 1) + ". " + leaderboard[x].DisplayName;
             leaderboardEntries[x].transform.Find("ScoreText").GetComponent<TextMeshProUGUI>().text = (-(float)leaderboard[x].StatValue * 0.001f).ToString("F2");
         }
@@ -92,7 +93,8 @@ public class Leaderboard : MonoBehaviour
         }
         else
         {
-            PlayFabClientAPI.UpdatePlayerStatistics(new UpdatePlayerStatisticsRequest
+            bool hasFastest = false;
+            /*PlayFabClientAPI.UpdatePlayerStatistics(new UpdatePlayerStatisticsRequest
                 {
                     Statistics = new List<StatisticUpdate>
                     {
@@ -111,7 +113,55 @@ public class Leaderboard : MonoBehaviour
                 {
                     Debug.LogError(error.GenerateErrorReport());
                 }
+            );*/
+
+            PlayFabClientAPI.GetPlayerStatistics(new GetPlayerStatisticsRequest(),
+                result =>
+                {
+                    foreach(var eachStat in result.Statistics)
+                    {
+                        if(eachStat.StatisticName == "FastestTime")
+                        {
+                            hasFastest = true;
+                            Debug.Log("old: " + eachStat.Value + "\nNew: " + newScore);
+                            if(eachStat.Value < newScore)
+                            {
+                                Debug.Log("update");
+                                UpdatePlayerStatistics(newScore);
+                            }
+                        }
+                    }
+                    if(!hasFastest)
+                    {
+                        Debug.Log("initialize");
+                        UpdatePlayerStatistics(newScore);
+                    }
+                },
+                error =>
+                {
+                    Debug.Log(error.ErrorMessage);
+                }
             );
         }
+    }
+
+    private void UpdatePlayerStatistics (int newScore)
+    {
+        PlayFabClientAPI.UpdatePlayerStatistics(new UpdatePlayerStatisticsRequest
+        {
+            Statistics = new List<StatisticUpdate>
+            {
+                new StatisticUpdate {StatisticName = "FastestTime", Value = newScore},
+            }
+        },
+        result =>
+        {
+            Debug.Log("User statistics update");
+        },
+        error =>
+        {
+            Debug.Log(error.GenerateErrorReport());
+        }
+        );
     }
 }
